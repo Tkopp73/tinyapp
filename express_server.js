@@ -38,10 +38,6 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-app.get("urls/:id", (req, res) => {
-  res.render("urls_new");
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
