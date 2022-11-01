@@ -16,16 +16,16 @@ generateRandomString = () => {
 }
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  res.redirect('/urls')
 });
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -38,20 +38,6 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-
-app.post("urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
-  const shortURL = generateRandomString();
-  const longURL = req.body.longURL;
-  if(longURL.includes('http://') || longURL.includes('https://')) {
-    urlDatabase[shortURL] = req.body.longURL;
-  } else {
-    urlDatabase[shortURL] = `http://${req.body.longURL}`;
-  }
-  res.redirect(`/urls/${shortURL}`);
-});
-
 app.get("urls/:id", (req, res) => {
   res.render("urls_new");
 });
@@ -60,9 +46,26 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body> Hello <b> World</b><body><?html>\n");
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id
+  delete urlDatabase[id];
+  res.redirect("/urls");
 });
+
+app.post("urls/new", (req, res) => {
+  const shortURL = generateRandomString();
+  console.log(shortURL);
+  const longURL = req.body.longURL;
+  console.log(longURL);
+  if(longURL.includes('http://') || longURL.includes('https://')) {
+    urlDatabase[shortURL] = req.body.longURL;
+  } else {
+    urlDatabase[shortURL] = `http://${req.body.longURL}`;
+  }
+  res.redirect(`/urls`);
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
