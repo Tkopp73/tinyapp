@@ -52,11 +52,9 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("urls/new", (req, res) => {
+app.post("/urls/new", (req, res) => {
   const shortURL = generateRandomString();
-  console.log(shortURL);
   const longURL = req.body.longURL;
-  console.log(longURL);
   if(longURL.includes('http://') || longURL.includes('https://')) {
     urlDatabase[shortURL] = req.body.longURL;
   } else {
