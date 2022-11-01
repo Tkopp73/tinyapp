@@ -33,10 +33,23 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
+
 
 app.post("urls", (req, res) => {
   console.log(req.body);
   res.send("Ok");
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  if(longURL.includes('http://') || longURL.includes('https://')) {
+    urlDatabase[shortURL] = req.body.longURL;
+  } else {
+    urlDatabase[shortURL] = `http://${req.body.longURL}`;
+  }
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("urls/:id", (req, res) => {
