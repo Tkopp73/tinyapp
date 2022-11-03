@@ -27,15 +27,6 @@ const users = {
   }
 };
 
-const emailChecker = (newEmail) => {
-  for (let user in users) {
-    if (newEmail === user.email) {
-      return true;
-    }
-  }
-  return false;
-};
-
 const generateRandomString = () => {  
   const randomString = (Math.random() + 1).toString(36).substring(7);
   return randomString;
@@ -46,29 +37,49 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const user_id = req.cookies.userID;
+  if (!user_id) {
+    return res.redirect("/urls/login");
+  } else {
   const templateVars = { urls: urlDatabase, userID: req.cookies.userID };
-  console.log(req.cookies.userID);
   res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
+  const user_id = req.cookies.userID;
+  if (!user_id) {
+    return res.redirect("/urls/login");
+  } else {
   const templateVars = { userID: req.cookies.userID };
   res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/register", (req, res) => {
+  const user_id = req.cookies.userID;
   const templateVars = { userID: req.cookies.userID, user: users };
   return res.render("urls_register", templateVars);
 });
 
 app.get("/urls/login", (req, res) => {
-  const templateVars = { userID: req.cookies.userID, user: users };
-  return res.render("urls_loginpage", templateVars);
+  const user_id = req.cookies.userID;
+  if (user_id) {
+    return res.redirect("/urls");
+  } else {
+    const templateVars = { userID: req.cookies.userID, user: users };
+    return res.render("urls_loginpage", templateVars);
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users};
-  res.render("urls_show", templateVars);
+  const user_id = req.cookies.userID;
+  if (!user_id) {
+    res.send("ERROR: Not logged in!");
+  } else {
+    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], userID: user_id};
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/u/:id", (req, res) => {
