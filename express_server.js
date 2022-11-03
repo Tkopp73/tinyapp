@@ -62,7 +62,8 @@ app.get("/urls/register", (req, res) => {
 });
 
 app.get("/urls/login", (req, res) => {
-  return res.render("urls_loginpage")
+  const templateVars = { userID: req.cookies.userID, user: users };
+  return res.render("urls_loginpage", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -133,7 +134,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie('userID');
-  res.redirect("/urls");
+  res.redirect("/urls/login");
 });
 
 app.listen(PORT, () => {
