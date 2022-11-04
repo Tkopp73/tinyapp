@@ -2,7 +2,9 @@ const express = require("express");
 const cookieparser = require("cookie-parser");
 const app = express();
 const morgan = require('morgan');
+const bcrypt = require('bcryptjs');
 const PORT = 8080;
+
 
 app.use(morgan('dev'));
 app.set("view engine", "ejs");
@@ -15,12 +17,12 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: bcrypt.hashSync("purple-monkey-dinosaur"),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: bcrypt.hashSync("dishwasher-funk"),
   }
 };
 
@@ -101,7 +103,7 @@ app.get("/u/:id", (req, res) => {
 app.post("/login", (req, res) => {
   for (let user in users) {
     if (users[user].email === req.body.email) {
-      if (users[user].password === req.body.password) {
+      if (bcrypt.compareSync(req.body.password, users[user].password)) {
         res.cookie("userID", users[user]);
         return res.redirect("/urls");
       } else {
@@ -122,7 +124,7 @@ app.post("/register", (req, res) => {
     } else {
       const userID = generateRandomString();
       const email = req.body.email;
-      const password = req.body.password;
+      const password = bcrypt.hashSync(req.body.password);
       users[userID] = {"id": userID, "email": email, "password": password};
       res.cookie("userID", users[userID]);
       return res.redirect("/urls");
