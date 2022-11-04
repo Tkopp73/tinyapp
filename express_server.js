@@ -9,10 +9,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieparser());
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+const urlDatabase = {};
 
 const users = {
   userRandomID: {
@@ -27,6 +24,17 @@ const users = {
   }
 };
 
+const urlsForUser = (id) => {
+  let userURLS = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url]["userID"] === id) {
+      userURLS[url] = urlDatabase[url];
+    }
+  }
+  return userURLS;
+};
+
+
 const generateRandomString = () => {  
   const randomString = (Math.random() + 1).toString(36).substring(7);
   return randomString;
@@ -38,11 +46,13 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user_id = req.cookies.userID;
+  const templateVars = { urls: undefined, userID: undefined};
   if (!user_id) {
     return res.redirect("/urls/login");
   } else {
-  const templateVars = { urls: urlDatabase, userID: req.cookies.userID };
-  res.render("urls_index", templateVars);
+    templateVars.urls = urlsForUser(user_id.id);
+    templateVars["userID"] = user_id
+    res.render("urls_index", templateVars);
   }
 });
 
@@ -77,7 +87,8 @@ app.get("/urls/:id", (req, res) => {
   if (!user_id) {
     res.send("ERROR: Not logged in!");
   } else {
-    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], userID: user_id};
+    console.log(urlDatabase[req.params.id].longURL);
+    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, userID: user_id};
     res.render("urls_show", templateVars);
   }
 });
@@ -120,12 +131,13 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/urls/new", (req, res) => {
+  const user_id = req.cookies.userID;
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   if(longURL.includes('http://') || longURL.includes('https://')) {
-    urlDatabase[shortURL] = req.body.longURL;
+    urlDatabase[shortURL] = {"longURL": longURL, userID: user_id.id};
   } else {
-    urlDatabase[shortURL] = `http://${req.body.longURL}`;
+    urlDatabase[shortURL] = {"longURL": `http://${longURL}`, userID: user_id.id};
   }
   return res.redirect("/urls");
 });
