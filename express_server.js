@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
+const getUserByEmail = require('./views/helper')
 const PORT = 8080;
 
 
@@ -38,7 +39,6 @@ const urlsForUser = (id) => {
   }
   return userURLS;
 };
-
 
 const generateRandomString = () => {  
   const randomString = (Math.random() + 1).toString(36).substring(7);
@@ -105,7 +105,7 @@ app.get("/u/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   for (let user in users) {
-    if (users[user].email === req.body.email) {
+    if (getUserByEmail(req.body.email, users)) {
       if (bcrypt.compareSync(req.body.password, users[user].password)) {
         req.session.userID = users[user];
         return res.redirect("/urls");
@@ -119,10 +119,9 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  for (let user in users) {
     if (req.body.email === "") {
       res.send("Status code 400");
-    } else if (req.body.email === users[user].email) {
+    } else if (getUserByEmail(req.body.email, users)) {
       res.send("Email already in use! Status code 400");
     } else {
       const userID = generateRandomString();
@@ -132,15 +131,12 @@ app.post("/register", (req, res) => {
       req.session.userID = users[userID];
       return res.redirect("/urls");
     };
-  }
 });
 
 app.post("/urls/new", (req, res) => {
   const user_id = req.session.userID;
-  console.log(user_id.id);
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
-  console.log(longURL);
   if(longURL.includes('http://') || longURL.includes('https://')) {
     urlDatabase[shortURL] = {"longURL": longURL, userID: user_id.id};
   } else {
