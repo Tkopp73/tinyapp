@@ -24,8 +24,8 @@
       </div>
       <div class="card-footer text-muted"></div>
       <h3>Edit</h3>
+      <form method="post" action="/urls/<%= id %>">
       <div class="form-group mb-2">
-        <form method="post" action="/urls/<%= id %>">
         <label for="longURL">New URL:
           <input
           class="form-control"

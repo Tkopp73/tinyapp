@@ -38,11 +38,11 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user_id = req.session.userID;
-  const templateVars = { urls: undefined, userID: undefined};
+  const templateVars = {userID: user_id, urls: urlDatabase}; 
   if (!user_id) {
     return res.redirect("/login");
   } else {
-    templateVars.urls = urlsForUser(user_id.id, urlDatabase);
+    templateVars.urls = urlsForUser(user_id, urlDatabase);
     templateVars["userID"] = user_id
     res.render("urls_index", templateVars);
   }
@@ -76,11 +76,11 @@ app.get("/login", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const user_id = req.session.userID;
-  let urlid = req.params.id;
+  let urlID = req.params.id;
   if (!user_id) {
     res.send("ERROR: Not logged in!");
   } else {
-    const templateVars = { id: req.params.id, longURL: urlDatabase[urlid].longURL, userID: user_id};
+    const templateVars = { id: req.params.id, longURL: urlDatabase[urlID].longURL, userID: user_id};
     res.render("urls_show", templateVars);
   }
 });
@@ -91,16 +91,17 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  const foundUser = getUserByEmail(req.body.email, users);
   for (let user in users) {
-    if (getUserByEmail(req.body.email, users)) {
-      if (bcrypt.compareSync(req.body.password, users[user].password)) {
+    if (foundUser) {
+      if (bcrypt.compareSync(req.body.password, foundUser.password)) {
         req.session.userID = users[user];
         return res.redirect("/urls");
       } else {
-        res.send("ERROR: Username or password is incorrect");
+        return res.send("ERROR: Username or password is incorrect");
       }
     } else {
-      res.send("ERROR: Username or password is incorrect");
+      return res.send("ERROR: Username or password is incorrect");
     }
   };
 });
@@ -114,7 +115,7 @@ app.post("/register", (req, res) => {
       const userID = generateRandomString();
       const email = req.body.email;
       const password = bcrypt.hashSync(req.body.password);
-      users[userID] = {"id": userID, "email": email, "password": password};
+      users[userID] = {id: userID, email: email, password: password};
       req.session.userID = users[userID];
       return res.redirect("/urls");
     };
@@ -134,8 +135,9 @@ app.post("/urls/new", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
+  const user_id = req.session.userID.id;
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  urlDatabase[id] = {longURL: longURL, userID: user_id};
   res.redirect("/urls")
 });
 
@@ -146,7 +148,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session.userID = null;
+  req.session = null;
   res.redirect("/login");
 });
 

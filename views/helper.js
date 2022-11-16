@@ -1,16 +1,15 @@
 const getUserByEmail = (email, database) => {
   for (let user in database) {
     if (database[user].email === email) {
-      return true;
+      return database[user];
     }
   }
-  return false;
 };
 
 const urlsForUser = (id, urlDatabase) => {
   let userURLS = {};
   for (let url in urlDatabase) {
-    if (urlDatabase[url]["userID"] === id) {
+    if (urlDatabase[url].userID === id.id) {
       userURLS[url] = urlDatabase[url];
     }
   }
