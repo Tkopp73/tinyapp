@@ -38,11 +38,19 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user_id = req.session.userID;
+<<<<<<< HEAD
   const templateVars = {userID: user_id, urls: urlDatabase}; 
   if (!user_id) {
     return res.redirect("/login");
   } else {
     templateVars.urls = urlsForUser(user_id, urlDatabase);
+=======
+  const templateVars = { urls: undefined, userID: undefined};
+  if (!user_id) {
+    return res.redirect("/login");
+  } else {
+    templateVars.urls = urlsForUser(user_id.id, urlDatabase);
+>>>>>>> b83aabd4d15e558d88cdd83c7483efe0ff98ba2e
     templateVars["userID"] = user_id
     res.render("urls_index", templateVars);
   }
@@ -76,11 +84,19 @@ app.get("/login", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const user_id = req.session.userID;
+<<<<<<< HEAD
   let urlID = req.params.id;
   if (!user_id) {
     res.send("ERROR: Not logged in!");
   } else {
     const templateVars = { id: req.params.id, longURL: urlDatabase[urlID].longURL, userID: user_id};
+=======
+  let urlid = req.params.id;
+  if (!user_id) {
+    res.send("ERROR: Not logged in!");
+  } else {
+    const templateVars = { id: req.params.id, longURL: urlDatabase[urlid].longURL, userID: user_id};
+>>>>>>> b83aabd4d15e558d88cdd83c7483efe0ff98ba2e
     res.render("urls_show", templateVars);
   }
 });
@@ -93,8 +109,13 @@ app.get("/u/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const foundUser = getUserByEmail(req.body.email, users);
   for (let user in users) {
+<<<<<<< HEAD
     if (foundUser) {
       if (bcrypt.compareSync(req.body.password, foundUser.password)) {
+=======
+    if (getUserByEmail(req.body.email, users)) {
+      if (bcrypt.compareSync(req.body.password, users[user].password)) {
+>>>>>>> b83aabd4d15e558d88cdd83c7483efe0ff98ba2e
         req.session.userID = users[user];
         return res.redirect("/urls");
       } else {
@@ -115,7 +136,11 @@ app.post("/register", (req, res) => {
       const userID = generateRandomString();
       const email = req.body.email;
       const password = bcrypt.hashSync(req.body.password);
+<<<<<<< HEAD
       users[userID] = {id: userID, email: email, password: password};
+=======
+      users[userID] = {"id": userID, "email": email, "password": password};
+>>>>>>> b83aabd4d15e558d88cdd83c7483efe0ff98ba2e
       req.session.userID = users[userID];
       return res.redirect("/urls");
     };
@@ -148,7 +173,11 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
+<<<<<<< HEAD
   req.session = null;
+=======
+  req.session.userID = null;
+>>>>>>> b83aabd4d15e558d88cdd83c7483efe0ff98ba2e
   res.redirect("/login");
 });
 
