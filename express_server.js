@@ -92,18 +92,16 @@ app.get("/u/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   const foundUser = getUserByEmail(req.body.email, users);
-  for (let user in users) {
     if (foundUser) {
       if (bcrypt.compareSync(req.body.password, foundUser.password)) {
-        req.session.userID = users[user];
+        req.session.userID = foundUser;
         return res.redirect("/urls");
       } else {
         return res.send("ERROR: Username or password is incorrect");
       }
     } else {
       return res.send("ERROR: Username or password is incorrect");
-    }
-  };
+    };
 });
 
 app.post("/register", (req, res) => {
